@@ -1,0 +1,59 @@
+String ICACHE_FLASH_ATTR printIP(IPAddress adress)
+{
+	return (String)adress[0] + "." + (String)adress[1] + "." + (String)adress[2] + "." + (String)adress[3];
+}
+
+String ICACHE_FLASH_ATTR my_round(float val)
+{
+	static char outstr[16];
+	dtostrf(val, 15, 1, outstr);
+	String strng = String(outstr);
+	strng.trim();
+	return strng;
+}
+
+void ICACHE_FLASH_ATTR parseBytes(const char *str, char sep, byte *bytes, int maxBytes, int base)
+{
+	for (int i = 0; i < maxBytes; i++)
+	{
+		bytes[i] = strtoul(str, NULL, base); // Convert byte
+		str = strchr(str, sep);				 // Find next separator
+		if (str == NULL || *str == '\0')
+		{
+			break; // No more separators, exit
+		}
+		str++; // Point to next character after separator
+	}
+}
+
+String ICACHE_FLASH_ATTR getKind(uint8_t knd)
+{
+	String res = "";
+	uint8_t tmp = knd & 0b00001110;
+	if (tmp > 0)
+	{
+		if (tmp & 0b00000100)
+		{
+			res += tempok;
+		}
+		else 
+		{
+			res += tempalarm;
+		}
+		res += "\r\n";
+	}
+	knd &= 0b01110000;
+	if (knd > 0)
+	{
+		if (knd & 0b00100000)
+		{
+			res += humok;
+		}
+		else 
+		{
+			res += humalarm;
+		}
+	}
+	res.trim();
+	return res;
+}
