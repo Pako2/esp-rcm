@@ -40,7 +40,7 @@ On Windows you can use **"flash.bat"**, it will ask you which COM port that ESP 
 ##### Backend
 The build environment is based on [PlatformIO](http://platformio.org). Follow the instructions found here: http://platformio.org/#!/get-started for installing it.
 
-The resulting (built) image(s) can be found in the directory ```.pioenvs\generic```.
+The resulting (built) image(s) can be found in the directory ```/bin``` created during the build process.
 
 ##### Frontend
 You can not simply edit Web UI files because you will need to convert them to C arrays, which can be done automatically by a gulp script that can be found in tools directory or you can use compiled executables at the same directory as well (for Windows PCs only).
