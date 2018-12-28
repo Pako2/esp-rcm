@@ -85,7 +85,7 @@ Remember, the I2C bus needs pull-up resistors of 4.7kΩ. On most modules, howeve
 * Congratulations, everything went well, if you encounter any issue feel free to ask help on GitHub.
 
 ### Known Issues
-* You need to connect your MFRC522 reader to your ESP properly or you will end up with a boot loop
+* So far, no issue is known
 * Please also check [GitHub issues](https://github.com/Pako2/esp-rcm/issues).
 
 ## License
