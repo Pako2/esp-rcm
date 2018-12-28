@@ -1,0 +1,779 @@
+<div id="backupcontent">
+    <br>
+    <br>
+    <div class="row">
+        <div class="col-sm-6">
+            <legend>Backup</legend>
+            <h6 class="text-muted">Please make sure that you have made a backup on regular basis.</h6>
+            <div>
+                <button class="btn btn-link btn-sm" onclick="backupset();">Backup Settings</button>
+                <a id="downloadSet" style="display:none"></a>
+            </div>
+            <br>
+            <div>
+                <legend>Restore</legend>
+                <h6 class="text-muted">Click on links and choose your backup file to restore.</h6>
+                <label for="restoreSet" class="btn btn-link btn-sm">Restore Settings</label>
+                <input id="restoreSet" type="file" accept="text/json" onchange="restoreSet();" style="display:none;">
+            </div>
+            <br>
+            <div>
+                <legend>Restart</legend>
+                <h6 class="text-muted">Click to restart your device without saving changes.</h6>
+                <label for="restart" class="btn btn-link btn-sm">Restart Device</label>
+                <button id="restart" class="btn btn-link btn-sm" onclick="restartESP();" style="display:none;"></button>
+            </div>
+            <br>
+            <div id="restoremodal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="pbar" class="progress">
+                                <div id="dynamic" class="progress-bar progress-bar-primary progress-bar-striped active">Restoring...</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" id="restoreclose" style="display:none;" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <br>
+</div>
+<div id="progresscontent">
+    <br>
+    <br>
+    <div class="container">
+        <div class="row">
+            <br>
+            <div class="col-md-8 col-md-offset-2">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Please wait while your ESP restarts...</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="progress">
+                            <div id="updateprog" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%">0%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer text-center" id="reconnect" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="generalcontent">
+    <br>
+    <br>
+    <legend>General Settings</legend>
+	    <br>
+    <div class="row form-group">
+        <label class="col-xs-3">Admin Password<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Log On password for the Administrator"></i></label>
+        <span class="col-xs-9 col-md-5">
+              <input class="form-control input-sm" placeholder="Administrator Password" id="adminpwd"  type="password">
+              </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Host Name<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Hostname for your ESP, When Bonjour is installed on your computer you can access your ESP via http://hostname.local"></i></label>
+        <span class="col-xs-9 col-md-5">
+              <input class="form-control input-sm" placeholder="Hostname" value="esp-rcm" id="hostname" type="text">
+              </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Auto Restart<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="How often to automatically restart the unit to lessen risk of memory leaks and crashes."></i></label>
+        <span class="col-xs-9 col-md-5">
+                <select class="form-control input-sm" id="autorestart" name="autorestart">
+                  <option value='0'>Never</option>
+                  <option value='86400' selected>Every 24h</option>
+                  <option value='604800'>Every 7 days</option>
+                  <option value='18144000'>Every 30 days</option>
+                </select>
+              </span>
+        <br>
+        <br>
+        <div class="col-xs-9 col-md-8">
+            <button onclick="savegeneral()" class="btn btn-primary btn-sm pull-right">Save</button>
+        </div>
+    </div>
+    <div style="clear:both;">
+        <br>
+        <br>
+    </div>
+</div>
+<br>
+<br>
+<!-- </div> -->
+<div id="hardwarecontent">
+    <br>
+    <br>
+    <legend>Hardware Settings</legend>
+    <h6 class="text-muted">Please refer the <a href="https://github.com/esprcm/esp-rcm#pin-layout">documentation</a> for pin configuration.</h6>
+	    <br>
+    <div class="row form-group">
+        <label class="col-xs-3">Sensor Type<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Choose sensor type."></i></label>
+        <div class="col-xs-9 col-md-5">
+            <select class="form-control input-sm" id="sensorType">
+                <option selected="selected" value="0">HTU21D</option>
+                <option value="1">Si7021</option>
+                <option value="2">AM2320</option>
+            </select>
+        </div>
+    </div>
+    <br>
+    <div class="row form-group">
+        <label class="col-xs-3">WiFi LED<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Choose &quot;WiFi LED&quot; pin"></i></label>
+        <span class="col-xs-9 col-md-5">
+              <select class="form-control input-sm" id="wifipin">
+                <option value="255">None</option>
+                <option value="0">GPIO-0</option>
+                <option selected="selected" value="2">GPIO-2 (LED_BUILTIN)</option>
+                <option value="12">GPIO-12</option>
+                <option value="13">GPIO-13</option>
+                <option value="14">GPIO-14</option>
+                <option value="15">GPIO-15</option>
+                <option value="16">GPIO-16</option>
+              </select>
+        </span>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Force AP mode Pin<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Choose force AP mode pin"></i></label>
+        <span class="col-xs-9 col-md-5">
+              <select class="form-control input-sm" id="cfgpin">
+                <option value="12">GPIO-12</option>
+                <option value="13">GPIO-13</option>
+                <option value="14">GPIO-14</option>
+              </select>
+        </span>
+    </div>
+    <div class="row form-group">
+        <div class="col-xs-9 col-md-8">
+            <button onclick="savehardware()" class="btn btn-primary btn-sm pull-right">Save</button>
+        </div>
+    </div>
+    <br>
+    <br>
+</div>
+<div id="logcontent">
+    <br>
+    <br>
+    <div class="text-center" id="loading-img">
+        <h5>Please wait while fetching data...<span id="loadpages"></span></h5>
+        <br>
+    </div>
+    <div>
+        <legend>Access Log</legend>
+        <div class="panel panel-default">
+            <div>
+                <table id="latestlogtable" class="table" data-paging="true" data-filtering="true" data-sorting="true" data-editing="false" data-state="true"></table>
+            </div>
+        </div>
+        <button onclick="clearlatest()" class="btn btn-primary btn-sm">Clear Log</button>
+        <div style="clear:both;">
+            <br>
+            <br>
+        </div>
+    </div>
+    <br>
+    <br>
+</div>
+<div id="eventcontent">
+    <br>
+    <br>
+    <div class="text-center" id="loading-img">
+        <h5>Please wait while fetching data...<span id="loadpages"></span></h5>
+        <br>
+    </div>
+    <div>
+        <legend>Event Log</legend>
+        <div class="panel panel-default">
+            <div>
+                <table id="eventtable" class="table" data-paging="true" data-filtering="true" data-sorting="true" data-editing="false" data-state="true"></table>
+            </div>
+        </div>
+        <button onclick="clearevent()" class="btn btn-primary btn-sm">Clear Log</button>
+        <div style="clear:both;">
+            <br>
+            <br>
+        </div>
+    </div>
+</div>
+
+<div id="mqttcontent">
+    <br>
+    <br>
+    <legend>MQTT Settings</legend>
+	    <br>
+    <div class="row form-group">
+        <label class="col-xs-3">MQTT<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Please choose if you want to enable MQTT"></i></label>
+        <div class="col-xs-9">
+            <form>
+                <label class="radio-inline"><input type="radio" value="1" name="mqttenabled">Enabled</label>
+                <label class="radio-inline"><input type="radio" value="0" name="mqttenabled" checked>Disabled</label>
+            </form>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">IP<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="MQTT server IP Address or url"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input class="form-control input-sm" placeholder="MQTT Host" id="mqtthost" type="text">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Port<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="MQTT server port"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input class="form-control input-sm" placeholder="MQTT Port" value="" id="mqttport" type="text">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">User<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="MQTT user"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input class="form-control input-sm" placeholder="" value="" id="mqttuser" type="text">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Password<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="MQTT server password if any"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input class="form-control input-sm" placeholder="" value="" id="mqttpwd"  type="password">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Topic<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="MQTT topic"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input class="form-control input-sm" placeholder="MQTT topic" value="" id="mqtttopic" type="text">
+        </span>
+        <br>
+        <br>
+        <div class="col-xs-9 col-md-8">
+        <span class="pull-right">
+            <button onclick="sendtestmessage()" class="btn btn-primary btn-sm">Send test message</button>
+            &nbsp;&nbsp;
+            <button onclick="savemqtt()" class="btn btn-primary btn-sm">Save</button>
+        </span>
+        </div>
+    </div>
+    <br>
+    <br>
+</div>
+<div id="emailcontent">
+    <div class="row form-group">
+    <legend  class="col-xs-9 col-md-8">E-mail Settings
+      <span class="pull-right"><i style="font-size: 60%;">You can add new recipient by clicking on "Edit Recipients/New Recipient" button.</i>
+      </span>
+    </legend>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">E-mail<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Please choose if you want to enable E-mail"></i></label>
+        <div class="col-xs-9">
+            <form>
+                <label class="radio-inline"><input type="radio" value="1" name="emailenabled">Enabled</label>
+                <label class="radio-inline"><input type="radio" value="0" name="emailenabled" checked>Disabled</label>
+            </form>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">SMTP Server<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="SMTP server url"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input class="form-control input-sm" placeholder="SMTP Server" id="emailserver" type="text">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Port<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="SMTP server port"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input class="form-control input-sm" placeholder="SMTP Port" value="465" id="emailport" type="text">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">User name<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="E-mail account name or address"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input class="form-control input-sm" placeholder="" value="" id="emailuser" type="text">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Password<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="E-mail account password"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input class="form-control input-sm" placeholder="" value="" id="emailpwd"  type="password">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">E-mail address<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="E-mail address"></i></label>
+        <span class="col-xs-8 col-md-5">
+            <input class="form-control input-sm" placeholder="" value="" id="emailaddress" type="email">
+        </span>
+        <br>
+    </div>
+<div class="container-fluid col-md-8" id="tbpanel">
+    <div class="row">
+    <div class="panel panel-default">
+        <table id="reciptable" class="table footable table-striped table-hover" data-sorting="true" data-editing="true" data-state="true"></table>
+    </div>
+    </div>
+    <div class="modal fade" id="editor-modal" tabindex="-1" role="dialog" aria-labelledby="editor-title">
+        <div class="modal-dialog" role="document">
+            <form class="modal-content form-horizontal" id="editor">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                    <h4 class="modal-title" id="editor-title">Add Recipient</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="number" id="id" name="id" class="hidden" />
+                    <div class="form-group">
+                        <label for="nickname" class="col-sm-3 control-label">Recipient name</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="nickname" name="nickname" placeholder="Nickname"  required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="recaddr" class="col-sm-3 control-label">Recipient e-mail address</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="recaddr" name="recaddr" placeholder="Recipient e-mail address" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <span class="col-md-8">
+        <span class="pull-right">
+            <button onclick="sendtestemail()" class="btn btn-primary btn-sm">Send test e-mail</button>
+            &nbsp;&nbsp;
+            <button onclick="saveemail()" class="btn btn-primary btn-sm">Save</button>
+        </span>
+    <span>
+</div>
+</div>
+
+<div id="pushettacontent">
+    <br>
+    <br>
+    <legend>Pushetta Settings</legend>
+	    <br>
+    <div class="row form-group">
+        <label class="col-xs-3">Pushetta<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Please choose if you want to enable Pushetta service"></i></label>
+        <div class="col-xs-9">
+            <form>
+                <label class="radio-inline"><input type="radio" value="1" name="pushettaenabled">Enabled</label>
+                <label class="radio-inline"><input type="radio" value="0" name="pushettaenabled" checked>Disabled</label>
+            </form>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Pushetta Server<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Pushetta server url"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input class="form-control input-sm" placeholder="api.pushetta.com" id="pushettaserver" type="text">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Port<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Pushetta server port"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input class="form-control input-sm" placeholder="Pushetta Port" value="80" id="pushettaport" type="text">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Channel<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Pushetta channel"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input class="form-control input-sm" placeholder="" value="" id="pushettachannel" type="text">
+        </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">API key<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Pushetta API key"></i></label>
+        <span class="col-xs-9 col-md-5">
+            <input class="form-control input-sm" placeholder="" value="" id="pushettakey"  type="password">
+        </span>
+        <br>
+        <br>
+        <div class="col-xs-9 col-md-8">
+        <span class="pull-right">
+            <button onclick="pushtestnotif()" class="btn btn-primary btn-sm">Push test notification</button>
+            &nbsp;&nbsp;
+            <button onclick="savepushetta()" class="btn btn-primary btn-sm">Save</button>
+        </span>
+        </div>
+    </div>
+    <br>
+    <br>
+</div>
+<div id="networkcontent">
+    <br>
+    <br>
+    <legend>Wi-Fi Settings</legend>
+    <h6 class="text-muted">Type your Wi-Fi Network's SSID or Scan for nerby Wireless Networks to join.</h6>
+    <br>
+    <div class="row form-group">
+        <label class="col-xs-3">SSID<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Wi-Fi Network's Name"></i></label>
+        <span class="col-xs-7 col-md-5">
+                <input class="form-control input-sm" id="inputtohide" type="text" name="ap_ssid">
+                <select class="form-control input-sm" style="display:none;" id="ssid" onchange="listBSSID();"></select>
+              </span>
+        <span class="col-xs-2">
+                <button id="scanb" class="btn btn-primary btn-xs" onclick="scanWifi()">Scan</button>
+              </span>
+    </div>
+    <div class="row form-group" style="display:block" id="hideBSSID">
+        <label class="col-xs-3">BSSID<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="If you have two Wi-Fi networks with the same SSID you may want to choose the specific one by BSSID"></i></label>
+        <span class="col-xs-9 col-md-5">
+              <input id="wifibssid" class="form-control input-sm" type="text" name="ap_bssid">
+              </span>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Password<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Wi-Fi Password"></i></label>
+        <span class="col-xs-9 col-md-5">
+              <input id="wifipass" class="form-control input-sm" name="ap_passwd" type="password">
+              </span>
+    </div>
+    <br>
+
+    <br>
+    <div class="row form-group" id="dhcp">
+        <label class="col-xs-3">Use DHCP<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Choose if you want to get an IP address from DHCP server or not."></i></label>
+        <div class="col-xs-9">
+            <form>
+                <label class="radio-inline">
+                    <input type="radio" value="1" name="dhcpenabled" onclick="handleDHCP();" checked>Yes</label>
+                <label class="radio-inline">
+                    <input type="radio" value="0" name="dhcpenabled" onclick="handleDHCP();">No</label>
+            </form>
+        </div>
+    </div>
+    <div id="staticip1" style="display:none">
+        <div class="row form-group">
+            <label class="col-xs-3">IP Address<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-html="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Enter IP Address<BR>(for example 192.168.4.1)"></i></label>
+            <span class="col-xs-9 col-md-5">
+              <input id="ipaddress" class="form-control input-sm">
+              </span>
+        </div>
+        <div class="row form-group">
+            <label class="col-xs-3">Subnet Mask<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-html="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Enter Subnet Mask<BR>(for example 255.255.255.0)"></i></label>
+            <span class="col-xs-9 col-md-5">
+              <input id="subnet" class="form-control input-sm">
+              </span>
+        </div>
+    </div>
+    <div id="staticip2" style="display:none">
+        <div class="row form-group">
+            <label class="col-xs-3">DNS Server</label>
+            <span class="col-xs-9 col-md-5">
+              <input id="dnsadd" class="form-control input-sm">
+              </span>
+        </div>
+        <div class="row form-group">
+            <label class="col-xs-3">Gateway</label>
+            <span class="col-xs-9 col-md-5">
+              <input id="gateway" class="form-control input-sm">
+              </span>
+        </div>
+    </div>
+    <br>
+    <div class="row form-group">
+        <div class="col-xs-9 col-md-8">
+            <button onclick="savenetwork()" class="btn btn-primary btn-sm pull-right">Save</button>
+        </div>
+    </div>
+    <br>
+    <br>
+</div>
+
+<div id="ntpcontent">
+    <br>
+    <br>
+    <legend>Time Settings</legend>
+    <h6 class="text-muted">Small differences between device time and local time can be ignored. Please see <a href="https://github.com/esprcm/esp-rcm#time">documentation</a> for additional information.</h6>
+	<br>
+    <div class="row form-group">
+        <label class="col-xs-3">Device Time</label>
+        <span id="utc" class="col-xs-9 col-md-5">
+              </span>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Browser Time</label>
+        <span id="rtc" class="col-xs-9 col-md-5">
+              </span>
+    </div>
+    <div class="row form-group">
+        <div class="col-xs-3">
+            <button onclick="syncBrowserTime()" class="btn btn-link btn-sm">Sync Browser Time to Device</button><i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Send your PC/Phone time to ESP."></i>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">NTP Server<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="The server for the time sync. Choose nearest server for better accuracy, see ntp.org for servers nearby."></i></label>
+        <span class="col-xs-9 col-md-5">
+              <input class="form-control input-sm" placeholder="eg. pool.ntp.org" value="pool.ntp.org" id="ntpserver" type="text">
+              </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Intervals<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Intervals between Time Sync in Minutes"></i></label>
+        <span class="col-xs-9 col-md-5">
+              <input class="form-control input-sm" placeholder="in Minutes" value="30" id="intervals" type="text">
+              </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Time Zone</label>
+        <span class="col-xs-9 col-md-5">
+                <select class="form-control input-sm" name="DropDownTimezone" id="DropDownTimezone">
+                  <option value="-12">(GMT -12:00) Eniwetok, Kwajalein</option>
+                  <option value="-11">(GMT -11:00) Midway Island, Samoa</option>
+                  <option value="-10">(GMT -10:00) Hawaii</option>
+                  <option value="-9">(GMT -9:00) Alaska</option>
+                  <option value="-8">(GMT -8:00) Pacific Time (US &amp; Canada)</option>
+                  <option value="-7">(GMT -7:00) Mountain Time (US &amp; Canada)</option>
+                  <option value="-6">(GMT -6:00) Central Time (US &amp; Canada), Mexico City</option>
+                  <option value="-5">(GMT -5:00) Eastern Time (US &amp; Canada), Bogota, Lima</option>
+                  <option value="-4">(GMT -4:00) Atlantic Time (Canada), Caracas, La Paz</option>
+                  <option value="-3.5">(GMT -3:30) Newfoundland</option>
+                  <option value="-3">(GMT -3:00) Brazil, Buenos Aires, Georgetown</option>
+                  <option value="-2">(GMT -2:00) Mid-Atlantic</option>
+                  <option value="-1">(GMT -1:00 hour) Azores, Cape Verde Islands</option>
+                  <option selected="selected" value="0">(GMT) Western Europe Time, London, Lisbon, Casablanca</option>
+                  <option value="1">(GMT +1:00 hour) Brussels, Copenhagen, Madrid, Paris</option>
+                  <option value="2">(GMT +2:00) Kaliningrad, South Africa</option>
+                  <option value="3">(GMT +3:00) Baghdad, Riyadh, Moscow, St. Petersburg</option>
+                  <option value="3.5">(GMT +3:30) Tehran</option>
+                  <option value="4">(GMT +4:00) Abu Dhabi, Muscat, Baku, Tbilisi</option>
+                  <option value="4.5">(GMT +4:30) Kabul</option>
+                  <option value="5">(GMT +5:00) Ekaterinburg, Islamabad, Karachi, Tashkent</option>
+                  <option value="5.5">(GMT +5:30) Bombay, Calcutta, Madras, New Delhi</option>
+                  <option value="5.75">(GMT +5:45) Kathmandu</option>
+                  <option value="6">(GMT +6:00) Almaty, Dhaka, Colombo</option>
+                  <option value="7">(GMT +7:00) Bangkok, Hanoi, Jakarta</option>
+                  <option value="8">(GMT +8:00) Beijing, Perth, Singapore, Hong Kong</option>
+                  <option value="9">(GMT +9:00) Tokyo, Seoul, Osaka, Sapporo, Yakutsk</option>
+                  <option value="9.5">(GMT +9:30) Adelaide, Darwin</option>
+                  <option value="10">(GMT +10:00) Eastern Australia, Guam, Vladivostok</option>
+                  <option value="11">(GMT +11:00) Magadan, Solomon Islands, New Caledonia</option>
+                  <option value="12">(GMT +12:00) Auckland, Wellington, Fiji, Kamchatka</option>
+                </select>
+              </span>
+        <br>
+        <br>
+        <div class="col-xs-9 col-md-8">
+            <button onclick="saventp()" class="btn btn-primary btn-sm pull-right">Save</button>
+        </div>
+        <br>
+        <br>
+        <br>
+    </div>
+    <br>
+    <br>
+</div>
+<div id="climatecontent">
+<div class="container">
+<legend>Climate Status</legend><br>
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="thermometer">
+        <div class="glass">
+          <div class="range">
+        <div class="amount"></div>
+          </div>
+        </div>
+        <div class="bulb">
+          <span class="circle"></span>
+          <span class="filler"></span>
+        </div>
+        <div class="display temper_val" style="left:-25px;">
+            <span id="temper_val"></span><span>&nbsp;&deg;C</span>
+        </div>
+        <div  class="display humid_val" style="left:130px;">
+            <span id="humid_val"></span><span>&nbsp;%</span>
+        </div>
+        <div class="rel_hum">Relative humidity</div>
+        <div class="gauge">
+            <div class="gauge_scale color-red"></div>
+        </div>
+        </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div id="statuscontent">
+    <br>
+    <div class="row text-center">
+        <div class="col-md-8 col-md-offset-2">
+            <h1>Welcome</h1>
+            <p>Here you can find some information about your device status.</p>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <span>esp-rcm (Room Climate Monitor)</span>&nbsp; <small><strong><span id="sver"></span></strong></small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8 col-md-offset-2">
+            <div class="panel panel-default table-responsive">
+                <table class="table table-hover table-striped table-condensed">
+                    <caption>Device</caption>
+                    <tr>
+                        <th>Chip ID</th>
+                        <td id="chip"></td>
+                    </tr>
+                    <tr>
+                        <th>CPU Clock</th>
+                        <td id="cpu"></td>
+                    </tr>
+                    <tr>
+                        <th>Uptime</th>
+                        <td id="uptime"></td>
+                    </tr>
+                    <tr>
+                        <th>Free Heap</th>
+                        <td>
+                            <div class="progress" style="margin-bottom: 0 !important;">
+                                <div id="heap" class="progress-bar progress-bar-primary" role="progressbar">
+                                    Progress
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Free Flash</th>
+                        <td>
+                            <div class='progress' style="margin-bottom: 0 !important;">
+                                <div id="flash" class="progress-bar progress-bar-primary" role="progressbar">
+                                    Progress
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Free SPIFFS</th>
+                        <td>
+                            <div class='progress' style="margin-bottom: 0 !important;">
+                                <div id="spiffs" class="progress-bar progress-bar-primary" role="progressbar">
+                                    Progress
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="panel panel-default table-responsive">
+                <table class="table table-hover table-striped table-condensed">
+                    <caption>Network</caption>
+                    <tr>
+                        <th>SSID</th>
+                        <td id="ssidstat"></td>
+                    </tr>
+                    <tr>
+                        <th>IP</th>
+                        <td id="ip"></td>
+                    </tr>
+                    <tr>
+                        <th>Gateway</th>
+                        <td id="gate"></td>
+                    </tr>
+                    <tr>
+                        <th>Mask</th>
+                        <td id="mask"></td>
+                    </tr>
+                    <tr>
+                        <th>DNS</th>
+                        <td id="dns"></td>
+                    </tr>
+                    <tr>
+                        <th>MAC</th>
+                        <td id="mac"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <br>
+        <br>
+    </div>
+</div>
+
+<div id="alarmscontent">
+    <br>
+    <br>
+    <legend>Alarm Settings</legend>
+	    <br>
+    <div class="row form-group">
+        <label class="col-xs-3">Temperature Limits [&deg;C]<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Set the lower and upper limits of the allowed temperature"></i></label>
+        <span class="col-xs-9 col-md-5" style="margin-top:-20px;">
+              <span id="slider1" class="color-green">
+              <input type="text" class="js-range-slider1" value="" />
+              </span>
+        </span>
+    </div>
+    <br>
+    <div class="row form-group">
+        <label class="col-xs-3">Humidity Limits [%]<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Set the lower and upper limits of the allowed humidity"></i></label>
+        <span class="col-xs-9 col-md-5" style="margin-top:-20px;">
+              <span id="slider2" class="color-green">
+              <input type="text" class="js-range-slider2" value="" />
+              </span>
+        </span>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Room/Object Name<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Set the Room/Object name. It will be used in messages."></i></label>
+        <span class="col-xs-9 col-md-5">
+              <input class="form-control input-sm" placeholder="eg. Server Room" value="" id="roomname" type="text">
+              </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Temperature Alarm Text<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Set text to report temperature outside of limits."></i></label>
+        <span class="col-xs-9 col-md-5">
+              <input class="form-control input-sm" placeholder='eg. "The temperature is outside the specified limits"' value="" id="tempalarm" type="text">
+              </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Temperature OK Text<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Set text to report temperature within of limits."></i></label>
+        <span class="col-xs-9 col-md-5">
+              <input class="form-control input-sm" placeholder='eg. "The temperature is within the specified limits"' value="" id="tempok" type="text">
+              </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Humidity Alarm Text<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Set text to report humidity outside of limits."></i></label>
+        <span class="col-xs-9 col-md-5">
+              <input class="form-control input-sm" placeholder='eg. "The humidity is outside the specified limits"' value="" id="humalarm" type="text">
+              </span>
+        <br>
+    </div>
+    <div class="row form-group">
+        <label class="col-xs-3">Humidity OK Text<i style="margin-left: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="right" data-content="Set text to report humidity within of limits."></i></label>
+        <span class="col-xs-9 col-md-5">
+              <input class="form-control input-sm" placeholder='eg. "The humidity is within the specified limits"' value="" id="humok" type="text">
+              </span>
+        <br>
+        <br>
+        <div class="col-xs-9 col-md-8">
+            <button onclick="savealarms()" class="btn btn-primary btn-sm pull-right">Save</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- <form name="registrationForm">
+    <input type="range" name="ageInputName" id="ageInputId" value="24" min="1" max="100" oninput="ageOutputId.value = ageInputId.value">
+    <output name="ageOutputName" id="ageOutputId">24</output>
+</form> -->
