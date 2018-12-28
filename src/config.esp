@@ -1,0 +1,300 @@
+bool ICACHE_FLASH_ATTR loadConfiguration()
+{
+	File configFile = SPIFFS.open("/config.json", "r");
+	if (!configFile)
+	{
+#ifdef DEBUG
+		Serial.println(F("[ WARN ] Failed to open config file"));
+#endif
+		return false;
+	}
+	size_t size = configFile.size();
+	std::unique_ptr<char[]> buf(new char[size]);
+	configFile.readBytes(buf.get(), size);
+	DynamicJsonBuffer jsonBuffer;
+	JsonObject &json = jsonBuffer.parseObject(buf.get());
+	if (!json.success())
+	{
+#ifdef DEBUG
+		Serial.println(F("[ WARN ] Failed to parse config file"));
+#endif
+		return false;
+	}
+#ifdef DEBUG
+	Serial.println(F("[ INFO ] Config file found"));
+	json.prettyPrintTo(Serial);
+	Serial.println();
+#endif
+	JsonObject &network = json["network"];
+	JsonObject &hardware = json["hardware"];
+	JsonObject &general = json["general"];
+	JsonObject &ntp = json["ntp"];
+	JsonObject &email = json["email"];
+	JsonObject &pushetta = json["pushetta"];
+	JsonObject &mqtt = json["mqtt"];
+	JsonObject &alarm = json["alarm"];
+#ifdef DEBUG
+	Serial.println(F("[ INFO ] Trying to setup Sensor Hardware"));
+#endif
+
+	sensortype = hardware["sensorType"];
+	if (sensortype == 0)
+	{
+		uint8_t i = 1;
+		do
+		{
+			if (myHTU21D.begin(SDA_PIN, SCL_PIN))
+			{
+				sensorok = true;
+#ifdef DEBUG
+				Serial.println(F("[ INFO ] HTU21D sensor found"));
+#endif
+				// temperature.value = myHTU21D.readTemperature();
+				// humidity.value = myHTU21D.readCompensatedHumidity(temperature.value);
+				break;
+			}
+			else
+			{
+#ifdef DEBUG
+				Serial.println(F("[ WARN ] HTU21D sensor not found"));
+#endif
+				if (i < MAX_RETRIES)
+				{
+					i++;
+					delay(2000);
+				}
+				else
+				{
+					break;
+				}
+			}
+		} while (true);
+	}
+	else if (sensortype == 1)
+	{
+		uint8_t i = 1;
+		do
+		{
+			if (myHTU21D.begin(SDA_PIN, SCL_PIN))
+			{
+				sensorok = true;
+#ifdef DEBUG
+				Serial.println(F("[ INFO ] Si7021 sensor found"));
+#endif
+				break;
+			}
+			else
+			{
+#ifdef DEBUG
+				Serial.println(F("[ WARN ] Si7021 sensor not found"));
+#endif
+				if (i < MAX_RETRIES)
+				{
+					i++;
+					delay(2000);
+				}
+				else
+				{
+					break;
+				}
+			}
+		} while (true);
+	}
+	else if (sensortype == 2)
+	{
+		myAM2320.begin(SDA_PIN, SCL_PIN);
+		sensorok = myAM2320.getErrorCode()==0;
+#ifdef DEBUG
+		if (sensorok)
+				Serial.println(F("[ INFO ] AM2320 sensor found"));
+		else
+				Serial.println(F("[ WARN ] AM2320 sensor not found"));
+#endif
+	}
+
+	wifipin = hardware["wifipin"];
+	if (wifipin != 255)
+	{
+		pinMode(wifipin, OUTPUT);
+		digitalWrite(wifipin, LEDoff);
+	}
+	forceAPpin = hardware["cfgpin"];
+
+	if (forceAPpin != 255)
+	{
+#ifdef DEBUG
+		Serial.print(F("[ INFO ] Force AP mode button pin = "));
+		Serial.println(forceAPpin);
+#endif
+		pinMode(forceAPpin, INPUT_PULLUP);
+		if (digitalRead(forceAPpin) == LOW)
+		{
+			forceAPmode = true;
+#ifdef DEBUG
+			Serial.println(F("[ INFO ] Force AP mode button pressed"));
+#endif
+			return false;
+		}
+	}
+
+	autoRestartIntervalSeconds = general["restart"];
+	//wifiTimeout = network["offtime"];
+	const char *bssidmac = network["bssid"];
+	byte bssid[6];
+	parseBytes(bssidmac, ':', bssid, 6, 16);
+	deviceHostname = strdup(general["hostnm"]);
+	WiFi.hostname(deviceHostname);
+	if (!MDNS.begin(deviceHostname))
+	{
+#ifdef DEBUG
+		Serial.println(F("[ WARN ]Error setting up MDNS responder!"));
+#endif
+	}
+	MDNS.addService("http", "tcp", 80);
+	const char *ntpserver = ntp["server"];
+	int ntpinter = ntp["interval"];
+	timeZone = ntp["timezone"];
+	//activateTime = hardware["rtime"];
+
+	const char *ssid = network["ssid"];
+	const char *password = network["pswd"];
+	//wmode = network["wmode"];
+	http_pass = strdup(general["pswd"]);
+	ws.setAuthentication("admin", http_pass);
+
+	if (network["dhcp"] == "0")
+	{
+		WiFi.mode(WIFI_STA);
+		const char *clientipch = network["ip"];
+		const char *subnetch = network["subnet"];
+		const char *gatewaych = network["gateway"];
+		const char *dnsch = network["dns"];
+		IPAddress clientip;
+		IPAddress subnet;
+		IPAddress gateway;
+		IPAddress dns;
+		clientip.fromString(clientipch);
+		subnet.fromString(subnetch);
+		gateway.fromString(gatewaych);
+		dns.fromString(dnsch);
+		WiFi.config(clientip, gateway, subnet, dns);
+	}
+	connectSTA(ssid, password, bssid);
+	// if (!connectSTA(ssid, password, bssid))
+	// {
+	// 	return false;
+	// }
+
+#ifdef DEBUG
+	Serial.println(F("[ INFO ] Trying to setup NTP Server"));
+#endif
+	/*
+	IPAddress timeserverip;
+	WiFi.hostByName(ntpserver, timeserverip);
+	String ip = printIP(timeserverip);
+	writeEvent("INFO", "ntp", "Connecting NTP Server", ip);
+	*/
+	NTP.Ntp(ntpserver, timeZone, ntpinter * 60);
+
+	emailenabled = email["enabled"];
+	if (emailenabled == 1)
+	{
+#ifdef DEBUG
+		Serial.println(F("[ INFO ] Trying to setup E-mail"));
+#endif
+		String smtpString = email["server"];
+		smtpServer = strdup(smtpString.c_str());
+		smtpport = email["port"];
+		String emUser = email["user"];
+		emuser = strdup(emUser.c_str());
+		String emPas = email["pswd"];
+		empas = strdup(emPas.c_str());
+		String emAddr = email["address"];
+		emaddr = strdup(emAddr.c_str());
+		String emRecip;
+		JsonArray &rcpnts = email["recipients"];
+		String recips = "";
+		for (JsonObject &rcpnt : rcpnts)
+		{
+			emRecip = (const char *)rcpnt["recaddr"];
+			recips += emRecip;
+			recips += "\n";
+		}
+		recips.trim();
+		recipients = strdup(recips.c_str());
+	}
+	pushettaenabled = pushetta["enabled"];
+	if (pushettaenabled == 1)
+	{
+#ifdef DEBUG
+		Serial.println(F("[ INFO ] Trying to setup Pushetta"));
+#endif
+		String srvrString = pushetta["server"];
+		pushserver = strdup(srvrString.c_str());
+		pushport = pushetta["port"];
+		String pushChannel = pushetta["channel"];
+		pushchannel = strdup(pushChannel.c_str());
+		String pushApi = pushetta["apikey"];
+		pushapikey = strdup(pushApi.c_str());
+	}
+
+	mqttenabled = mqtt["enabled"];
+	if (mqttenabled == 1)
+	{
+#ifdef DEBUG
+		Serial.println(F("[ INFO ] Trying to setup MQTT"));
+#endif
+		String mhsString = mqtt["host"];
+		mhs = strdup(mhsString.c_str());
+
+		mport = mqtt["port"];
+
+		String muserString = mqtt["user"];
+		muser = strdup(muserString.c_str());
+		String mpasString = mqtt["pswd"];
+		mpas = strdup(mpasString.c_str());
+		String mqttTopicString = mqtt["topic"];
+		mqttTopic = strdup(mqttTopicString.c_str());
+
+		mqttClient.setServer(mhs, mport);
+		mqttClient.setCredentials(muser, mpas);
+		mqttClient.onDisconnect(onMqttDisconnect);
+		mqttClient.onPublish(onMqttPublish);
+		mqttClient.onConnect(onMqttConnect);
+#ifdef DEBUG
+		Serial.println(F("[ INFO ] try to call mqttconnect "));
+#endif
+		connectToMqtt();
+	}
+
+	// int  templimits[] = {16,24};
+	// int  humlimits[] = {35,65};
+	// char *roomname = NULL;
+	// char *tempalarm = NULL;
+	// char *tempok = NULL;
+	// char *humalarm = NULL;
+	// char *humok = NULL;
+	String tempLimits = alarm["templimits"];
+	int ix = tempLimits.indexOf(";");
+	temperature.bottlimit = tempLimits.substring(0, ix).toInt();
+	temperature.toplimit = tempLimits.substring(ix + 1).toInt();
+	String humLimits = alarm["humlimits"];
+	ix = humLimits.indexOf(";");
+	humidity.bottlimit = humLimits.substring(0, ix).toInt();
+	humidity.toplimit = humLimits.substring(ix + 1).toInt();
+	String roomName = alarm["roomname"];
+	roomname = strdup(roomName.c_str());
+	String tempAlarm = alarm["tempalarm"];
+	tempalarm = strdup(tempAlarm.c_str());
+	String tempOk = alarm["tempok"];
+	tempok = strdup(tempOk.c_str());
+	String humAlarm = alarm["humalarm"];
+	humalarm = strdup(humAlarm.c_str());
+	String humOk = alarm["humok"];
+	humok = strdup(humOk.c_str());
+
+#ifdef DEBUG
+	Serial.println(F("[ INFO ] Configuration done."));
+#endif
+	return true;
+}

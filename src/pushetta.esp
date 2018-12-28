@@ -1,0 +1,153 @@
+//Function for sending the request to Pushetta
+void postPushetta()
+{
+	if (pushettaenabled == 1)
+	{
+		if (aClient) //client already exists
+			return;
+		aClient = new AsyncClient();
+		if (!aClient) //could not allocate client
+			return;
+
+		String text = String(roomname);
+		text += "\\r\\n";
+		if (pushettakind == 1)
+		{
+			text += "Pushetta test notification";
+		}
+		else
+		{
+			String knd = getKind(pushettakind);
+			knd.replace("\r\n", "\\r\\n");
+			text += knd;
+		}
+		text += "\\r\\nTemperature: " + my_round(temperature.value) + " °C\\r\\n";
+		text += "Humidity: " + my_round(humidity.value) + " %";
+		String content = "{\"body\":\"" + text + "\",\"message_type\":\"text/plain\"}";
+		String cont_len = String(content.length());
+		//int n =
+		sprintf(
+			request,
+			"POST /api/pushes/%s/ HTTP/1.0\r\nHost: %s\r\nAuthorization: Token %s\r\nContent-Length: %s\r\nContent-Type: application/json; charset=utf-8\r\n\r\n%s\r\n",
+			pushchannel,
+			pushserver,
+			pushapikey,
+			cont_len.c_str(),
+			content.c_str());
+
+		//aClient->onError([](void * arg, AsyncClient * client, int error){
+		aClient->onError([](void *arg, AsyncClient *client, err_t error) {
+		//Serial.println("Connect Error");
+#ifdef DEBUG
+			Serial.print(F("[ PUSH ] "));
+			Serial.print(failed);
+			Serial.print(F(" (error "));
+			Serial.print(String(error));
+			Serial.println(F(")"));
+#endif
+			if (pushettakind == 1)
+				sendConfirmation(String(failed) + " (error " + String(error) + ")"); //only if kind == test
+			else if (pushettakind > 1)
+			{
+				mqttkind = pushettakind;
+			}
+			pushettakind = 0;
+			aClient = NULL;
+			delete client;
+		},
+						 NULL);
+
+		aClient->onConnect([](void *arg, AsyncClient *client) {
+			//Serial.println("Connected");
+			aClient->onError(NULL, NULL);
+
+			client->onDisconnect([](void *arg, AsyncClient *c) {
+				//Serial.println("Disconnected");
+				//Serial.println(millis());
+				aClient = NULL;
+				delete c;
+				//finished = true;
+			},
+								 NULL);
+
+			client->onData([](void *arg, AsyncClient *c, void *data, size_t len) {
+				char *d = (char *)data;
+				char *cd = (char *)malloc(len + 1);
+				strncpy(cd, d, len + 1);
+				cd[len] = '\0';
+				String data_ = String(cd);
+				free(cd);
+				uint16_t ix = data_.indexOf("{");
+				if (ix > -1)
+				{
+					String response = data_.substring(ix);
+					if (response.indexOf("success") > -1)
+					{
+						char success[] = "The Pushetta notification has been sent successfully";
+#ifdef DEBUG
+						Serial.print(F("[ PUSH ] "));
+						Serial.println(success);
+#endif
+						if (pushettakind == 1)
+							sendConfirmation(String(success)); //only if kind == test
+					}
+					else
+					{
+#ifdef DEBUG
+						Serial.print(F("[ PUSH ] "));
+						Serial.println(failed);
+						Serial.print(F("[ PUSH ] "));
+						Serial.println(response);
+#endif
+						if (pushettakind == 1)
+							sendConfirmation(String(failed) + response); //only if kind == test
+					}
+				}
+				else
+				{
+#ifdef DEBUG
+					Serial.print(F("[ PUSH ] "));
+					Serial.print(failed);
+					Serial.println(F(" (bad response)"));
+#endif
+					if (pushettakind == 1)
+						sendConfirmation(String(failed) + " (bad response)"); //only if kind == test
+				}
+				if (pushettakind > 1)
+				{
+					mqttkind = pushettakind;
+				}
+				pushettakind = 0;
+			},
+						   NULL);
+
+			//the request sending
+			client->write(request);
+		},
+						   NULL);
+
+		if (!aClient->connect(pushserver, pushport))
+		{
+			//Serial.println("Connect Fail");
+#ifdef DEBUG
+			Serial.print(F("[ PUSH ] "));
+			Serial.print(failed);
+			Serial.println(F(" (no connect)"));
+#endif
+			if (pushettakind == 1)
+				sendConfirmation(String(failed) + " (no connect)"); //only if kind == test
+			else if (pushettakind > 1)
+			{
+				mqttkind = pushettakind;
+			}
+			pushettakind = 0;
+			AsyncClient *client = aClient;
+			aClient = NULL;
+			delete client;
+		}
+	}
+	else if (pushettakind > 1)
+	{
+		mqttkind = pushettakind;
+	}
+}

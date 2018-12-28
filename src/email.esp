@@ -1,0 +1,60 @@
+void sendEmail()
+{
+	if (emailenabled > 0)
+	{
+#ifdef DEBUG
+		Serial.println(F("[ SMTP ] SMTP server connection"));
+#endif
+		smtp = new SMTPClient;
+		smtp->begin(smtpServer, smtpport);
+		if (emuser && emuser[0] && empas && empas[0])
+		{
+			smtp->setAuthorization(emuser, empas);
+#ifdef DEBUG
+			Serial.println(F("[ SMTP ] Setting autorization"));
+#endif
+		}
+		//smtp->addHeader("Subject", "Test subject 003");
+		smtp->addHeader("Subject", roomname);
+		smtp->addRecipient(recipients);
+		String msg = "";
+		if (emailkind == 1)
+		{
+			msg = "Test email from " + String(roomname) + "\r\n";
+		}
+		else
+		{
+			msg = getKind(emailkind);
+		}
+		msg += "\r\nTemperature: " + my_round(temperature.value) + " °C\r\n";
+		msg += "Humidity: " + my_round(humidity.value) + " %";
+
+		int result = smtp->sendMessage(emuser, msg.c_str(), msg.length(), NULL, NULL);
+		char buf[128];
+		if (result == 250)
+		{
+			sprintf(buf, "The e-mail message has been sent successfully");
+#ifdef DEBUG
+			Serial.println(F("[ SMTP ] The e-mail message has been sent successfully"));
+#endif
+		}
+		else
+		{
+			sprintf(buf, "Email sending failed: %i %s %s", result, smtp->getErrorMessage(), smtp->errorToString(result).c_str());
+#ifdef DEBUG
+			Serial.printf("[ SMTP ] Message send result: %i %s %s\n", result, smtp->getErrorMessage(), smtp->errorToString(result).c_str());
+#endif
+		}
+		if (emailkind == 1)
+			sendConfirmation(String(buf)); //only if kind == test
+		smtp->end();
+		smtp->disconnect();
+		delete smtp;
+#ifdef DEBUG
+		Serial.println(F("[ SMTP ] Disconnecting from SMTP server"));
+#endif
+	}
+	if (emailkind > 1)
+		pushettakind = emailkind;
+	emailkind = 0;
+}

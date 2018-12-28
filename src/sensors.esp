@@ -1,0 +1,90 @@
+//returns 1 if value != rg.value
+uint8_t procval(reg *rg, float value)
+{
+  // Serial.print("rg.value = ");
+  // Serial.println((*rg).value);
+  // Serial.print("rg.stable = ");
+  // Serial.println((*rg).stable);
+  // Serial.print("rg.tendency = ");
+  // Serial.println((*rg).tendency);
+  // Serial.print("rg.counter = ");
+  // Serial.println((*rg).counter);
+  // Serial.print("rg.alarm = ");
+  // Serial.println((*rg).alarm);
+  uint8_t res = (uint8_t)(value != (*rg).value);
+  if (value >= (*rg).bottlimit && value <= (*rg).toplimit)
+  {
+    //Serial.println("AAAAA");
+    if ((*rg).stable != REL_OK)
+    {
+    //Serial.println("BBBBB");
+      if ((*rg).tendency == REL_OK)
+      {
+        //Serial.println("CCCCC");
+        (*rg).counter += 1;
+        if ((*rg).counter >= 2)
+        {
+          //Serial.println("DDDDD");
+          (*rg).alarm = true;
+          (*rg).stable = REL_OK;
+          (*rg).counter = 0;
+        }
+      }
+      else
+      {
+        //Serial.println("EEEEE");
+        (*rg).tendency = REL_OK;
+        (*rg).counter = 0;
+      }
+    }
+  }
+  else if (value < (*rg).bottlimit)
+  {
+    if ((*rg).stable != REL_UNDER)
+    {
+      if ((*rg).tendency == REL_UNDER)
+      {
+        (*rg).counter += 1;
+        if ((*rg).counter >= 2)
+        {
+          (*rg).alarm = true;
+          (*rg).stable = REL_UNDER;
+          (*rg).counter = 0;
+        }
+      }
+      else
+      {
+        (*rg).tendency = REL_UNDER;
+        (*rg).counter = 0;
+      }
+    }    
+  }
+  else //value>rg.toplimit
+  {
+    //Serial.println("FFFFF");
+    if ((*rg).stable != REL_OVER)
+    {
+      //Serial.println("GGGGG");
+      if ((*rg).tendency == REL_OVER)
+      {
+        //Serial.println("HHHHH");
+        (*rg).counter += 1;
+        if ((*rg).counter >= 2)
+        {
+          //Serial.println("IIIII");
+          (*rg).alarm = true;
+          (*rg).stable = REL_OVER;
+          (*rg).counter = 0;
+        }
+      }
+      else
+      {
+        //Serial.println("JJJJJ");
+        (*rg).tendency = REL_OVER;
+        (*rg).counter = 0;
+      }
+    }
+  }
+  (*rg).value = value;
+  return res;
+}
