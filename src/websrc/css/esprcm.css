@@ -1,0 +1,195 @@
+.color-green .irs-bar,
+.color-green .irs-bar-edge {
+    background: #1F982B;
+}
+.color-green .irs--flat .irs-from, 
+.color-green .irs--flat .irs-to, 
+.color-green .irs--flat .irs-single {
+    background: #1F982B;
+}
+.color-green .irs--flat .irs-from:hover, 
+.color-green .irs--flat .irs-to:hover, 
+.color-green .irs--flat .irs-single:hover {
+    background: #44da53;
+}
+.color-green .irs--flat .irs-from:before,
+.color-green  .irs--flat .irs-to:before,
+.color-green  .irs--flat .irs-single:before {
+border-top-color: #1F982B;
+}
+.color-green .irs--flat .irs-handle > i:first-child {
+  background-color: #35a440;
+}
+.color-green .irs--flat .irs-handle.state_hover > i:first-child,
+.color-green .irs--flat .irs-handle:hover > i:first-child {
+  background-color: #44da53;
+}
+#reciptable>tbody>tr>td, 
+#reciptable>tbody>tr>th{
+    padding: 0px 0px 0px 10px;
+    line-height: 1.7;
+    vertical-align: middle;
+    border-collapse: collapse;
+    border-top: 1px solid #ddd;
+}
+#reciptable>thead>tr>td, 
+#reciptable>thead>tr>th,
+#reciptable>tfoot>tr>td, 
+#reciptable>tfoot>tr>th{
+    line-height: 1.2;
+    vertical-align: middle;
+    border-collapse: collapse;
+    border-top: 1px solid #ddd;
+}
+#tbpanel{
+    margin-right: 0px;
+    margin-left: -10px;
+    margin-bottom: -15px;
+}
+.thermometer {
+  position:relative;
+  //top:10px;
+  left:30px;
+  min-width:200px;
+}
+.thermometer .glass {
+  background: #e5e5e5;
+  border-radius: 15px 15px 0 0;
+  display: block;
+  height: 245px;
+  margin: 0 35px 10px;
+  position: absolute;
+  top:0px;
+  width: 30px;
+}
+.thermometer .range{
+  background: #e5e5e5;
+  border-radius: 0;
+  display: block;
+  width: 20px;
+  max-height: 240px;
+  min-height: 240px;
+  position: absolute;
+  bottom: 0px;
+  left:5px;
+  z-index: 40;
+}
+.thermometer .amount {
+  background: #00008b;
+  border-radius: 10px 10px 0 0;
+  display: block;
+  width: 20px;
+  position: absolute;
+  bottom: 0px;
+  z-index: 30;
+}
+.thermometer .total {
+  position: absolute;
+  right: 35px;
+}
+.bulb {
+  background: #e5e5e5;
+  border-radius: 30px;
+  display: block;
+  height: 60px;
+  margin: 0 35px 10px;
+  position: absolute;
+  top: 240px;
+  left:-15px;
+  width: 60px;
+}
+.bulb .circle {
+  background: #00008b;
+  border-radius: 25px;
+  display: block;
+  position: absolute;
+  top: 5px;
+  left:5px;
+  height: 50px;
+  width: 50px;
+}
+.bulb .filler {
+  background: #00008b;
+  border-radius: 10px 10px 0 0;
+  display: block;
+  height: 12px;
+  width: 20px;
+  position: absolute;
+  top: -5px;
+  left: 20px;
+  z-index: 50;
+}
+.amounttxt {
+    border-bottom: 1px solid #000;
+    display:inline-block;
+    min-width: 70px;
+    max-width: 70px;
+    font-family: Arial;
+    font-weight: bold;
+    font-size: 16px;
+}
+.rel_hum {
+  position: absolute;
+  top: 75px;
+  left: 135px;
+  color:#a2a2a2;
+  font-family: Arial;
+  font-weight: bold;
+  font-size: 16px;
+}
+.gauge {
+  height: 8rem;
+  overflow: hidden;
+  position: absolute;
+  top: 150px;
+  left: 200px;
+  transform: translate(-50%, -50%);
+  width: 16rem;
+}
+.gauge_scale {
+  background: transparent;
+  border: 30px solid #E5E5E5;
+  border-radius: 50%;
+  height: 16rem;
+  position: relative;
+  width: 16rem;
+}
+.gauge_scale::before {
+  content: '';
+  height: 16rem;
+  left: -30px;
+  top: -30px;
+  transform: rotate(45deg);
+  position: absolute;
+  width: 16rem;
+}
+.color-blue::before {
+  border: 30px solid #00008b;
+  border-radius: 50%;
+  border-left-color: transparent;
+  border-top-color: transparent;
+}
+.color-red::before {
+  border: 30px solid #dc143c;
+  border-radius: 50%;
+  border-left-color: transparent;
+  border-top-color: transparent;
+}
+.color-green::before {
+  border: 30px solid #006400;
+  border-radius: 50%;
+  border-left-color: transparent;
+  border-top-color: transparent;
+}
+.display {
+    position:absolute;
+    min-width: 145px;
+    max-width: 145px;
+    top:305px;
+    font-family: Arial;
+    font-weight: bold;
+    font-size: 40px;
+    background:#d2d2d2;
+    border:1px solid #000;
+    text-align: center
+}
