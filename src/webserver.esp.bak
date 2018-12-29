@@ -60,7 +60,6 @@ void ICACHE_FLASH_ATTR setupWebServer()
 			return;
 		}
 		if (!index) {
-			updateflag = true;
 			writeEvent("INFO", "updt", "Firmware update started", filename.c_str());
 #ifdef DEBUG
 			Serial.printf("[ UPDT ] Firmware update started: %s\r\n", filename.c_str());
