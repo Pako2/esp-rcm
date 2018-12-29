@@ -349,8 +349,8 @@ function inProgress(callback) {
                         type: "POST",
                         data: formData,
                         processData: false,
-                        contentType: false,
-                        timeout: 10000
+                        contentType: false
+                        //timeout: 60000
                     });
                     break;
                 case "commit":
@@ -359,8 +359,8 @@ function inProgress(callback) {
                         url: "/commit",
                         dataType: "json",
                         contentType: "application/json",
-                        data: JSON.stringify(config),
-                        timeout: 2000
+                        data: JSON.stringify(config)
+                        //timeout: 2000
                     });
                     break;
                 case "destroy":
@@ -780,89 +780,89 @@ function initEventTable() {
     });
 }
 
-function initLatestLogTable() {
-    var newlist = [];
-    for (var i = 0; i < data.length; i++) {
-        var dup = JSON.parse(data[i]);
-        newlist[i] = {};
-        newlist[i].options = {};
-        newlist[i].value = {};
-        newlist[i].value = dup;
-        var c = dup.acctype;
-        switch (c) {
-            case 1:
-                newlist[i].options.classes = "success";
-                break;
-			case 2:
-                newlist[i].options.classes = "warning";
-                break;
-            case 99:
-                newlist[i].options.classes = "info";
-                break;
-            case 0:
-                newlist[i].options.classes = "warning";
-                break;
-            case 98:
-                newlist[i].options.classes = "danger";
-                break;
-            default:
-                break;
-        }
+// function initLatestLogTable() {
+    // var newlist = [];
+    // for (var i = 0; i < data.length; i++) {
+        // var dup = JSON.parse(data[i]);
+        // newlist[i] = {};
+        // newlist[i].options = {};
+        // newlist[i].value = {};
+        // newlist[i].value = dup;
+        // var c = dup.acctype;
+        // switch (c) {
+            // case 1:
+                // newlist[i].options.classes = "success";
+                // break;
+			// case 2:
+                // newlist[i].options.classes = "warning";
+                // break;
+            // case 99:
+                // newlist[i].options.classes = "info";
+                // break;
+            // case 0:
+                // newlist[i].options.classes = "warning";
+                // break;
+            // case 98:
+                // newlist[i].options.classes = "danger";
+                // break;
+            // default:
+                // break;
+        // }
 
-    }
-    jQuery(function($) {
-        window.FooTable.init("#latestlogtable", {
-            columns: [{
-                    "name": "timestamp",
-                    "title": "Date",
-                    "parser": function(value) {
-                        var comp = new Date();
-                        value = Math.floor(value + ((comp.getTimezoneOffset() * 60) * -1));
-                        var vuepoch = new Date(value * 1000);
-                        var formatted = vuepoch.getUTCFullYear() +
-                            "-" + twoDigits(vuepoch.getUTCMonth() + 1) +
-                            "-" + twoDigits(vuepoch.getUTCDate()) +
-                            "-" + twoDigits(vuepoch.getUTCHours()) +
-                            ":" + twoDigits(vuepoch.getUTCMinutes()) +
-                            ":" + twoDigits(vuepoch.getUTCSeconds());
-                        return formatted;
-                    },
-                    "sorted": true,
-                    "direction": "DESC"
-                },
-                {
-                    "name": "uid",
-                    "title": "UID",
-                    "type": "text",
-                    "style":"font-family:monospace"
-                },
-                {
-                    "name": "username",
-                    "title": "User Name or Label"
-                },
-                {
-                    "name": "acctype",
-                    "title": "Access",
-                    "breakpoints": "xs sm",
-                    "parser": function(value) {
-                        if (value === 1) {
-                            return "Granted";
-                        } else if (value === 99) {
-                            return "Admin";
-                        } else if (value === 0) {
-                            return "Disabled";
-                        } else if (value === 98) {
-                            return "Unknown";
-                        } else if (value === 2) {
-                            return "Expired";
-                        }
-                    }
-                }
-            ],
-            rows: newlist
-        });
-    });
-}
+    // }
+    // jQuery(function($) {
+        // window.FooTable.init("#latestlogtable", {
+            // columns: [{
+                    // "name": "timestamp",
+                    // "title": "Date",
+                    // "parser": function(value) {
+                        // var comp = new Date();
+                        // value = Math.floor(value + ((comp.getTimezoneOffset() * 60) * -1));
+                        // var vuepoch = new Date(value * 1000);
+                        // var formatted = vuepoch.getUTCFullYear() +
+                            // "-" + twoDigits(vuepoch.getUTCMonth() + 1) +
+                            // "-" + twoDigits(vuepoch.getUTCDate()) +
+                            // "-" + twoDigits(vuepoch.getUTCHours()) +
+                            // ":" + twoDigits(vuepoch.getUTCMinutes()) +
+                            // ":" + twoDigits(vuepoch.getUTCSeconds());
+                        // return formatted;
+                    // },
+                    // "sorted": true,
+                    // "direction": "DESC"
+                // },
+                // {
+                    // "name": "uid",
+                    // "title": "UID",
+                    // "type": "text",
+                    // "style":"font-family:monospace"
+                // },
+                // {
+                    // "name": "username",
+                    // "title": "User Name or Label"
+                // },
+                // {
+                    // "name": "acctype",
+                    // "title": "Access",
+                    // "breakpoints": "xs sm",
+                    // "parser": function(value) {
+                        // if (value === 1) {
+                            // return "Granted";
+                        // } else if (value === 99) {
+                            // return "Admin";
+                        // } else if (value === 0) {
+                            // return "Disabled";
+                        // } else if (value === 98) {
+                            // return "Unknown";
+                        // } else if (value === 2) {
+                            // return "Expired";
+                        // }
+                    // }
+                // }
+            // ],
+            // rows: newlist
+        // });
+    // });
+// }
 
 function initScale(bottlimit, toplimit){
 $(".range").append('<span class="total" style="bottom: 100%;"><span class="amounttxt"style="font-weight:normal;">50&nbsp;&deg;C</span></span>');
@@ -1033,15 +1033,15 @@ function socketMessageListener(evt) {
                 }
                 builddata(obj);
                 break;
-            case "latestlist":
-                haspages = obj.haspages;
-                if (haspages === 0) {
-                    document.getElementById("loading-img").style.display = "none";
-                    initLatestLogTable();
-                    break;
-                }
-                builddata(obj);
-                break;
+            // case "latestlist":
+                // haspages = obj.haspages;
+                // if (haspages === 0) {
+                    // document.getElementById("loading-img").style.display = "none";
+                    // initLatestLogTable();
+                    // break;
+                // }
+                // builddata(obj);
+                // break;
             case "gettime":
                 utcSeconds = obj.epoch;
                 timezone = obj.timezone;
@@ -1062,13 +1062,13 @@ function socketMessageListener(evt) {
     }
     if (obj.hasOwnProperty("resultof")) {
         switch (obj.resultof) {
-            case "latestlog":
-                if (obj.result === false) {
-                    logdata = [];
-                    initLatestLogTable();
-                    document.getElementById("loading-img").style.display = "none";
-                }
-                break;
+            // case "latestlog":
+                // if (obj.result === false) {
+                    // logdata = [];
+                    // initLatestLogTable();
+                    // document.getElementById("loading-img").style.display = "none";
+                // }
+                // break;
             case "eventlist":
                 if (page < haspages && obj.result === true) {
                     getnextpage("geteventlog");
@@ -1077,14 +1077,14 @@ function socketMessageListener(evt) {
                     document.getElementById("loading-img").style.display = "none";
                 }
                 break;
-            case "latestlist":
-                if (page < haspages && obj.result === true) {
-                    getnextpage("getlatestlog");
-                } else if (page === haspages) {
-                    initLatestLogTable();
-                    document.getElementById("loading-img").style.display = "none";
-                }
-                break;
+            // case "latestlist":
+                // if (page < haspages && obj.result === true) {
+                    // getnextpage("getlatestlog");
+                // } else if (page === haspages) {
+                    // initLatestLogTable();
+                    // document.getElementById("loading-img").style.display = "none";
+                // }
+                // break;
             default:
                 break;
         }
