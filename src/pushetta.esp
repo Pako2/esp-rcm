@@ -8,21 +8,24 @@ void postPushetta()
 		aClient = new AsyncClient();
 		if (!aClient) //could not allocate client
 			return;
-
+		time_t tmstmp;
 		String text = String(roomname);
 		text += "\\r\\n";
 		if (pushettakind == 1)
 		{
+			tmstmp = now();
 			text += "Pushetta test notification";
 		}
 		else
 		{
+			tmstmp = alarmtime;
 			String knd = getKind(pushettakind);
 			knd.replace("\r\n", "\\r\\n");
 			text += knd;
 		}
 		text += "\\r\\nTemperature: " + my_round(temperature.value) + " °C\\r\\n";
 		text += "Humidity: " + my_round(humidity.value) + " %";
+		text += "\\r\\nTime: "+ getLocalTimeString(tmstmp);
 		String content = "{\"body\":\"" + text + "\",\"message_type\":\"text/plain\"}";
 		String cont_len = String(content.length());
 		//int n =

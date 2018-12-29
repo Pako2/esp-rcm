@@ -2,6 +2,7 @@ void sendEmail()
 {
 	if (emailenabled > 0)
 	{
+		time_t tmstmp;
 #ifdef DEBUG
 		Serial.println(F("[ SMTP ] SMTP server connection"));
 #endif
@@ -20,14 +21,17 @@ void sendEmail()
 		String msg = "";
 		if (emailkind == 1)
 		{
+			tmstmp = now();
 			msg = "Test email from " + String(roomname) + "\r\n";
 		}
 		else
 		{
+			tmstmp = alarmtime;
 			msg = getKind(emailkind);
 		}
 		msg += "\r\nTemperature: " + my_round(temperature.value) + " °C\r\n";
 		msg += "Humidity: " + my_round(humidity.value) + " %";
+		msg += "\r\nTime: "+ getLocalTimeString(alarmtime);
 
 		int result = smtp->sendMessage(emuser, msg.c_str(), msg.length(), NULL, NULL);
 		char buf[128];

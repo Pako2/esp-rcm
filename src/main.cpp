@@ -76,6 +76,7 @@ AsyncWebSocket ws("/ws");
 
 unsigned long blink_ = millis();
 unsigned long now_;
+bool updateflag = false;
 bool wifiFlag = false;
 bool configMode = false;
 uint8_t wifipin = 255;
@@ -129,6 +130,7 @@ char *pushapikey = NULL;
 char *recipients = NULL;
 float tmp = 0;
 float hmd = 0;
+time_t alarmtime;
 
 typedef enum
 {
@@ -245,7 +247,7 @@ void ICACHE_RAM_ATTR loop()
 	uptime = NTP.getUptimeSec();
 	previousLoopMillis = currentMillis;
 
-	if (configMode)
+	if (configMode && !updateflag)
 	{
 		if (wifipin != 255)
 		{
@@ -272,7 +274,7 @@ void ICACHE_RAM_ATTR loop()
 				nextbeat += interval;
 #ifdef DEBUG
 			Serial.print(F("[ INFO ] Nextbeat = "));
-			Serial.println(nextbeat);
+			Serial.println(getLocalTimeString(nextbeat));
 #endif
 			if (sensortype == 0)
 			{
@@ -343,6 +345,7 @@ void ICACHE_RAM_ATTR loop()
 			if (knd > 0)
 			{
 				//process alarm
+				alarmtime=now();
 				emailkind = knd;
 			}
 			else if (wifiFlag)

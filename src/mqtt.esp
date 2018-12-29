@@ -51,7 +51,7 @@ void mqtt_publish_connect(time_t now_time, String const &wifi, String const &ip)
 	DynamicJsonBuffer jsonBuffer;
 	JsonObject &root = jsonBuffer.createObject();
 	root["type"] = "connect";
-	root["time"] = now_time;
+	root["time"] = getLocalTimeString(now_time);
 	root["Wifi SSID"] = wifi;
 	root["Local IP"] = ip;
 	root["roomname"] = roomname;
@@ -70,7 +70,7 @@ void mqtt_publish_heartbeat(time_t heartbeat)
 	DynamicJsonBuffer jsonBuffer;
 	JsonObject &root = jsonBuffer.createObject();
 	root["type"] = "heartbeat";
-	root["time"] = String(heartbeat); // TEST
+	root["time"] = getLocalTimeString(heartbeat);
 	root["temperature"] = my_round(temperature.value);
 	root["humidity"] = my_round(humidity.value);
 	root["roomname"] = roomname;
@@ -107,6 +107,7 @@ void mqtt_publish_climate()
 {
 	if (mqttenabled == 1)
 	{
+		time_t tmstmp;
 		char buf[256];
 		if (mqttClient.connected())
 		{
@@ -115,16 +116,19 @@ void mqtt_publish_climate()
 			JsonObject &root = jsonBuffer.createObject();
 			if (mqttkind == 1)
 			{
+				tmstmp = now();
 				root["type"] = "test message";
 			}
 			else if (mqttkind > 1)
 			{
+				tmstmp = alarmtime;
 				root["type"] = "alarm";
 				root["kind"] = getKind(mqttkind);
 			}
 			root["temperature"] = my_round(temperature.value);
 			root["temperature"] = my_round(temperature.value);
 			root["roomname"] = roomname;
+			root["time"] = getLocalTimeString(tmstmp);
 			size_t size = 1 + root.measureLength();
 			char buffer[size];
 			root.printTo(buffer, size);
