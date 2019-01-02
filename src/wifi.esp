@@ -1,11 +1,13 @@
 void wifiLedOn()
 {
-	if (wifipin!=255) digitalWrite(wifipin, LEDon);
+	if (wifipin != 255)
+		digitalWrite(wifipin, LEDon);
 }
 
 void wifiLedOff()
 {
-	if (wifipin!=255) digitalWrite(wifipin, LEDoff);
+	if (wifipin != 255)
+		digitalWrite(wifipin, LEDoff);
 }
 
 void onWifiConnect(const WiFiEventStationModeConnected &event)
@@ -15,19 +17,22 @@ void onWifiConnect(const WiFiEventStationModeConnected &event)
 #ifdef DEBUG
 	Serial.println(F("\r\n[ INFO ] WiFi STA Connected"));
 #endif
+
 	//mqttReconnectTimer.detach();
 }
 
 void onWifiDisconnect(const WiFiEventStationModeDisconnected &event)
 {
+
 	mqttReconnectTimer.detach();
+	mqttClient.disconnect(true);
 	if (wifiFlag)
 	{
 #ifdef DEBUG
 		Serial.println(F("[ INFO ] WiFi STA Disconnected"));
 #endif
-	wifiFlag = false;
-	wifiLedOff();
+		wifiFlag = false;
+		wifiLedOff();
 	}
 }
 
@@ -39,7 +44,7 @@ bool ICACHE_FLASH_ATTR startAP(IPAddress apip, IPAddress apsubnet, int hid, cons
 	Serial.print(F("[ INFO ] Configuring access point... "));
 #endif
 
-  	WiFi.softAPConfig(apip, apip, apsubnet);
+	WiFi.softAPConfig(apip, apip, apsubnet);
 
 	bool success;
 	if (hid == 1)
@@ -58,7 +63,8 @@ bool ICACHE_FLASH_ATTR startAP(IPAddress apip, IPAddress apsubnet, int hid, cons
 	{
 		ESP.restart();
 	}
-	else wifiLedOn();
+	else
+		wifiLedOn();
 
 #ifdef DEBUG
 	IPAddress myIP = WiFi.softAPIP();
@@ -86,8 +92,9 @@ void ICACHE_FLASH_ATTR fallbacktoAPMode()
 	bool success;
 	success = WiFi.softAP(ssid);
 	isWifiConnected = success;
-	if (success){
-	wifiLedOn();
+	if (success)
+	{
+		wifiLedOn();
 	}
 }
 
@@ -111,12 +118,14 @@ bool ICACHE_FLASH_ATTR connectSTA(const char *ssid, const char *password, byte b
 			break;
 		}
 		delay(500);
-		if (wifipin!=255) digitalWrite(wifipin, !digitalRead(wifipin));
+		if (wifipin != 255)
+			digitalWrite(wifipin, !digitalRead(wifipin));
 #ifdef DEBUG
-		if (!wifiFlag) Serial.print(F("."));
+		if (!wifiFlag)
+			Serial.print(F("."));
 #endif
 	} while (true);
-//	} while (millis() - now < timeout * 1000);
+	//	} while (millis() - now < timeout * 1000);
 	//} while ((millis() - now < timeout * 1000)||noAPfallback);
 	// We now out of the while loop, either time is out or we connected. check what happened
 	if (WiFi.status() == WL_CONNECTED)
