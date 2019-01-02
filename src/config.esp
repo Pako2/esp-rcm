@@ -1,4 +1,4 @@
-bool ICACHE_FLASH_ATTR loadConfiguration()
+uint8_t ICACHE_FLASH_ATTR loadConfiguration()
 {
 	File configFile = SPIFFS.open("/config.json", "r");
 	if (!configFile)
@@ -6,7 +6,7 @@ bool ICACHE_FLASH_ATTR loadConfiguration()
 #ifdef DEBUG
 		Serial.println(F("[ WARN ] Failed to open config file"));
 #endif
-		return false;
+		return 0;
 	}
 	size_t size = configFile.size();
 	std::unique_ptr<char[]> buf(new char[size]);
@@ -18,7 +18,7 @@ bool ICACHE_FLASH_ATTR loadConfiguration()
 #ifdef DEBUG
 		Serial.println(F("[ WARN ] Failed to parse config file"));
 #endif
-		return false;
+		return 0;
 	}
 #ifdef DEBUG
 	Serial.println(F("[ INFO ] Config file found"));
@@ -33,6 +33,26 @@ bool ICACHE_FLASH_ATTR loadConfiguration()
 	JsonObject &pushetta = json["pushetta"];
 	JsonObject &mqtt = json["mqtt"];
 	JsonObject &alarm = json["alarm"];
+
+	String tempLimits = alarm["templimits"];
+	int ix = tempLimits.indexOf(";");
+	temperature.bottlimit = tempLimits.substring(0, ix).toInt();
+	temperature.toplimit = tempLimits.substring(ix + 1).toInt();
+	String humLimits = alarm["humlimits"];
+	ix = humLimits.indexOf(";");
+	humidity.bottlimit = humLimits.substring(0, ix).toInt();
+	humidity.toplimit = humLimits.substring(ix + 1).toInt();
+	String roomName = alarm["roomname"];
+	roomname = strdup(roomName.c_str());
+	String tempAlarm = alarm["tempalarm"];
+	tempalarm = strdup(tempAlarm.c_str());
+	String tempOk = alarm["tempok"];
+	tempok = strdup(tempOk.c_str());
+	String humAlarm = alarm["humalarm"];
+	humalarm = strdup(humAlarm.c_str());
+	String humOk = alarm["humok"];
+	humok = strdup(humOk.c_str());
+
 #ifdef DEBUG
 	Serial.println(F("[ INFO ] Trying to setup Sensor Hardware"));
 #endif
@@ -49,8 +69,6 @@ bool ICACHE_FLASH_ATTR loadConfiguration()
 #ifdef DEBUG
 				Serial.println(F("[ INFO ] HTU21D sensor found"));
 #endif
-				// temperature.value = myHTU21D.readTemperature();
-				// humidity.value = myHTU21D.readCompensatedHumidity(temperature.value);
 				break;
 			}
 			else
@@ -103,12 +121,12 @@ bool ICACHE_FLASH_ATTR loadConfiguration()
 	else if (sensortype == 2)
 	{
 		myAM2320.begin(SDA_PIN, SCL_PIN);
-		sensorok = myAM2320.getErrorCode()==0;
+		sensorok = myAM2320.getErrorCode() == 0;
 #ifdef DEBUG
 		if (sensorok)
-				Serial.println(F("[ INFO ] AM2320 sensor found"));
+			Serial.println(F("[ INFO ] AM2320 sensor found"));
 		else
-				Serial.println(F("[ WARN ] AM2320 sensor not found"));
+			Serial.println(F("[ WARN ] AM2320 sensor not found"));
 #endif
 	}
 
@@ -123,7 +141,7 @@ bool ICACHE_FLASH_ATTR loadConfiguration()
 	if (forceAPpin != 255)
 	{
 #ifdef DEBUG
-		Serial.print(F("[ INFO ] Force AP mode button pin = "));
+		Serial.print(F("[ INFO ] Force AP mode pin = "));
 		Serial.println(forceAPpin);
 #endif
 		pinMode(forceAPpin, INPUT_PULLUP);
@@ -133,7 +151,7 @@ bool ICACHE_FLASH_ATTR loadConfiguration()
 #ifdef DEBUG
 			Serial.println(F("[ INFO ] Force AP mode button pressed"));
 #endif
-			return false;
+			return 1;
 		}
 	}
 
@@ -154,11 +172,8 @@ bool ICACHE_FLASH_ATTR loadConfiguration()
 	const char *ntpserver = ntp["server"];
 	int ntpinter = ntp["interval"];
 	timeZone = ntp["timezone"];
-	//activateTime = hardware["rtime"];
-
 	const char *ssid = network["ssid"];
 	const char *password = network["pswd"];
-	//wmode = network["wmode"];
 	http_pass = strdup(general["pswd"]);
 	ws.setAuthentication("admin", http_pass);
 
@@ -246,55 +261,22 @@ bool ICACHE_FLASH_ATTR loadConfiguration()
 #endif
 		String mhsString = mqtt["host"];
 		mhs = strdup(mhsString.c_str());
-
 		mport = mqtt["port"];
-
 		String muserString = mqtt["user"];
 		muser = strdup(muserString.c_str());
 		String mpasString = mqtt["pswd"];
 		mpas = strdup(mpasString.c_str());
 		String mqttTopicString = mqtt["topic"];
 		mqttTopic = strdup(mqttTopicString.c_str());
-
 		mqttClient.setServer(mhs, mport);
 		mqttClient.setCredentials(muser, mpas);
 		mqttClient.onDisconnect(onMqttDisconnect);
 		mqttClient.onPublish(onMqttPublish);
 		mqttClient.onConnect(onMqttConnect);
-#ifdef DEBUG
-		Serial.println(F("[ INFO ] try to call mqttconnect "));
-#endif
-		connectToMqtt();
+		//connectToMqtt(); moved to wifi.esp - onWifiConnect()
 	}
-
-	// int  templimits[] = {16,24};
-	// int  humlimits[] = {35,65};
-	// char *roomname = NULL;
-	// char *tempalarm = NULL;
-	// char *tempok = NULL;
-	// char *humalarm = NULL;
-	// char *humok = NULL;
-	String tempLimits = alarm["templimits"];
-	int ix = tempLimits.indexOf(";");
-	temperature.bottlimit = tempLimits.substring(0, ix).toInt();
-	temperature.toplimit = tempLimits.substring(ix + 1).toInt();
-	String humLimits = alarm["humlimits"];
-	ix = humLimits.indexOf(";");
-	humidity.bottlimit = humLimits.substring(0, ix).toInt();
-	humidity.toplimit = humLimits.substring(ix + 1).toInt();
-	String roomName = alarm["roomname"];
-	roomname = strdup(roomName.c_str());
-	String tempAlarm = alarm["tempalarm"];
-	tempalarm = strdup(tempAlarm.c_str());
-	String tempOk = alarm["tempok"];
-	tempok = strdup(tempOk.c_str());
-	String humAlarm = alarm["humalarm"];
-	humalarm = strdup(humAlarm.c_str());
-	String humOk = alarm["humok"];
-	humok = strdup(humOk.c_str());
-
 #ifdef DEBUG
 	Serial.println(F("[ INFO ] Configuration done."));
 #endif
-	return true;
+	return 2;
 }

@@ -31,7 +31,7 @@ void sendEmail()
 		}
 		msg += "\r\nTemperature: " + my_round(temperature.value) + " °C\r\n";
 		msg += "Humidity: " + my_round(humidity.value) + " %";
-		msg += "\r\nTime: "+ getLocalTimeString(alarmtime);
+		msg += "\r\nTime: "+ getLocalTimeString(tmstmp);
 
 		int result = smtp->sendMessage(emuser, msg.c_str(), msg.length(), NULL, NULL);
 		char buf[128];

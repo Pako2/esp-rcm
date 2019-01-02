@@ -1,4 +1,4 @@
-var version = "0.0.0";
+var version = "0.0.1";
 
 var websock = null;
 var wsUri = "ws://" + window.location.hostname + "/ws";
@@ -350,18 +350,10 @@ function inProgress(callback) {
                         data: formData,
                         processData: false,
                         contentType: false
-                        //timeout: 60000
                     });
                     break;
                 case "commit":
-                    $.ajax({
-                        type: "POST",
-                        url: "/commit",
-                        dataType: "json",
-                        contentType: "application/json",
-                        data: JSON.stringify(config)
-                        //timeout: 2000
-                    });
+                    websock.send(JSON.stringify(config));
                     break;
                 case "destroy":
                     websock.send("{\"command\":\"destroy\"}");
@@ -1211,7 +1203,7 @@ function logout() {
 
 function connectWS() {
     if (window.location.protocol === "https:") {
-        wsUri = "wss://" + window.location.hostname + "/ws";
+        wsUri = "wss://" + window.location.hostname + ":"+window.location.port + "/ws";
     } else if (window.location.protocol === "file:") {
         wsUri = "ws://" + "localhost" + "/ws";
     }

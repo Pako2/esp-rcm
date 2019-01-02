@@ -32,7 +32,7 @@ SOFTWARE.
 #include <FS.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
-#include <AsyncJson.h>
+//#include <AsyncJson.h>
 #include <TimeLib.h>
 #include <Ticker.h>
 #include "Ntp.h"
@@ -78,7 +78,7 @@ unsigned long blink_ = millis();
 unsigned long now_;
 bool updateflag = false;
 bool wifiFlag = false;
-bool configMode = false;
+uint8_t configMode = 0;
 uint8_t wifipin = 255;
 uint8_t forceAPpin = 255;
 uint8_t sensortype = 0;
@@ -231,7 +231,7 @@ void ICACHE_FLASH_ATTR setup()
 	wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
 	wifiConnectHandler = WiFi.onStationModeConnected(onWifiConnect);
 	configMode = loadConfiguration();
-	if (!configMode)
+	if (configMode < 2)
 	{
 		fallbacktoAPMode();
 	}
@@ -247,16 +247,24 @@ void ICACHE_RAM_ATTR loop()
 	uptime = NTP.getUptimeSec();
 	previousLoopMillis = currentMillis;
 
-	if (configMode && !updateflag)
+	if (!updateflag)
 	{
 		if (wifipin != 255)
 		{
-			if (!wifiFlag)
+			if (configMode == 2)
 			{
-				if ((currentMillis - blink_) > 500)
+				if (!wifiFlag)
 				{
-					blink_ = currentMillis;
-					digitalWrite(wifipin, !digitalRead(wifipin));
+					if ((currentMillis - blink_) > 500)
+					{
+						blink_ = currentMillis;
+						digitalWrite(wifipin, !digitalRead(wifipin));
+					}
+				}
+				else
+				{
+					if (!(digitalRead(wifipin) == LEDon))
+						digitalWrite(wifipin, LEDon);
 				}
 			}
 			else
@@ -265,13 +273,16 @@ void ICACHE_RAM_ATTR loop()
 					digitalWrite(wifipin, LEDon);
 			}
 		}
-
 		if (now_ >= nextbeat)
 		{
 			if ((now_ - nextbeat) > interval)
 				nextbeat = now_ + interval;
 			else
 				nextbeat += interval;
+			if (wifiFlag && mqttenabled && !mqttClient.connected())
+			{
+				connectToMqtt();
+			}
 #ifdef DEBUG
 			Serial.print(F("[ INFO ] Nextbeat = "));
 			Serial.println(getLocalTimeString(nextbeat));
@@ -345,17 +356,14 @@ void ICACHE_RAM_ATTR loop()
 			if (knd > 0)
 			{
 				//process alarm
-				alarmtime=now();
+				alarmtime = now();
 				emailkind = knd;
 			}
 			else if (wifiFlag)
 			{
 				mqtt_beat();
 			}
-			//}
-			//}
 		}
-
 		if (wifiFlag)
 		{
 			if (mqttkind > 0)
