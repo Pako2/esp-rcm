@@ -52,6 +52,7 @@ SOFTWARE.
 
 // these are from us which can be updated and changed
 #include "webh/esprcm.js.gz.h"
+#include "webh/esprcm.css.gz.h"
 #include "webh/esprcm.htm.gz.h"
 #include "webh/index.html.gz.h"
 

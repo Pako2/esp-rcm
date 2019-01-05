@@ -112,6 +112,11 @@ void ICACHE_FLASH_ATTR setupWebServer()
 		response->addHeader("Content-Encoding", "gzip");
 		request->send(response);
 	});
+	server.on("/css/esprcm.css", HTTP_GET, [](AsyncWebServerRequest *request) {
+		AsyncWebServerResponse *response = request->beginResponse_P(200, "text/css", esprcm_css_gz, esprcm_css_gz_len);
+		response->addHeader("Content-Encoding", "gzip");
+		request->send(response);
+	});
 	server.on("/js/required.js", HTTP_GET, [](AsyncWebServerRequest *request) {
 		AsyncWebServerResponse *response = request->beginResponse_P(200, "text/javascript", required_js_gz, required_js_gz_len);
 		response->addHeader("Content-Encoding", "gzip");
