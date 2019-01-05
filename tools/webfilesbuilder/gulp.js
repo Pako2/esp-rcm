@@ -16,4 +16,5 @@ require('gulp-flatmap');
 require('path');
 require('gulp-htmlmin');
 require('gulp-uglify');
+require('gulp-clean-css');
 require('pump');
