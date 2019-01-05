@@ -9,3 +9,10 @@ script:
 before_deploy:
 - cd ..
 - tar -zcf ${TRAVIS_BUILD_DIR}-${TRAVIS_TAG}.tar.gz -C ${TRAVIS_BUILD_DIR}/bin .
+deploy:
+  provider: releases
+  file: "${TRAVIS_BUILD_DIR}-${TRAVIS_TAG}.tar.gz"
+  skip_cleanup: true
+  on:
+    repo: Pako2/esp-rfid
+    all_branches: true
