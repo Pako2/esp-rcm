@@ -14,5 +14,5 @@ deploy:
   file: "${TRAVIS_BUILD_DIR}-${TRAVIS_TAG}.tar.gz"
   skip_cleanup: true
   on:
-    repo: Pako2/esp-rfid
+    repo: Pako2/esp-rcm
     all_branches: true
