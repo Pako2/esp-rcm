@@ -3,7 +3,7 @@
 Room Climate Monitor system using a cheap sensor HTU21D, SI7021 or AM2320 and Espressif's ESP8266 Microcontroller. 
 
 ## Preface
-This project is based on a similar [esp-rfid](https://github.com/esprfid/esp-rfid) project by Ömer Siar Baysal. I have used many done code and also design of html pages because it is very good. It saved me a lot of work.
+This project is based on a similar [esp-rfid](https://github.com/esprfid/esp-rfid) project by Ömer Şiar Baysal. I have used many done code and also design of html pages because it is very good. It saved me a lot of work.
 
 ## Features
 ### For Users

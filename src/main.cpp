@@ -26,13 +26,11 @@ SOFTWARE.
 #include "Arduino.h"
 #include <ESP8266WiFi.h>
 #include <WiFiClientSecure.h>
-//#include <SPI.h>
 #include <ESP8266mDNS.h>
 #include <ArduinoJson.h>
 #include <FS.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
-//#include <AsyncJson.h>
 #include <TimeLib.h>
 #include <Ticker.h>
 #include "Ntp.h"
@@ -331,6 +329,10 @@ void ICACHE_RAM_ATTR loop()
 					}
 				}
 			}
+			if (tmp > 99.9)
+				tmp = 99.9;
+			if (hmd > 99.9)
+				hmd = 99.9;
 			uint8_t diff = procval(&temperature, tmp);
 			diff += procval(&humidity, hmd);
 			if (diff > 0)
