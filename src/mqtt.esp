@@ -114,14 +114,14 @@ void mqtt_publish_climate()
 			const char *topic = mqttTopic;
 			DynamicJsonBuffer jsonBuffer;
 			JsonObject &root = jsonBuffer.createObject();
-			if (mqttkind == 1)
+			root["type"] = "alarm";
+			if (mqttkind == 1 || mqttkind == 0b10000000)
 			{
 				root["type"] = "test message";
 			}
-			else if (mqttkind > 1)
+			if (mqttkind > 1)
 			{
 				tmstmp = alarmtime;
-				root["type"] = "alarm";
 				root["kind"] = getKind(mqttkind);
 			}
 			root["temperature"] = my_round(temperature.value);

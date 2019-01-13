@@ -153,6 +153,9 @@ uint8_t ICACHE_FLASH_ATTR loadConfiguration()
 #endif
 			return 1;
 		}
+		  // Attach an interrupt to the pin, assign the onChange function as a handler and trigger on changes (LOW or HIGH).
+  attachInterrupt(forceAPpin, onChange, CHANGE);
+
 	}
 
 	autoRestartIntervalSeconds = general["restart"];

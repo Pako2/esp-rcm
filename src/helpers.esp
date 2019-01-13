@@ -29,32 +29,39 @@ void ICACHE_FLASH_ATTR parseBytes(const char *str, char sep, byte *bytes, int ma
 String ICACHE_FLASH_ATTR getKind(uint8_t knd)
 {
 	String res = "";
-	uint8_t tmp = knd & 0b00001110;
-	if (tmp > 0)
+	if (knd == 0b10000000)
 	{
-		if (tmp & 0b00000100)
-		{
-			res += tempok;
-		}
-		else
-		{
-			res += tempalarm;
-		}
-		res += "\r\n";
+		res += "Test buton pressed !";
 	}
-	knd &= 0b01110000;
-	if (knd > 0)
+	else
 	{
-		if (knd & 0b00100000)
+		uint8_t tmp = knd & 0b00001110;
+		if (tmp > 0)
 		{
-			res += humok;
+			if (tmp & 0b00000100)
+			{
+				res += tempok;
+			}
+			else
+			{
+				res += tempalarm;
+			}
+			res += "\r\n";
 		}
-		else
+		knd &= 0b01110000;
+		if (knd > 0)
 		{
-			res += humalarm;
+			if (knd & 0b00100000)
+			{
+				res += humok;
+			}
+			else
+			{
+				res += humalarm;
+			}
 		}
+		res.trim();
 	}
-	res.trim();
 	return res;
 }
 
@@ -64,4 +71,44 @@ String ICACHE_FLASH_ATTR getLocalTimeString(time_t utc)
 	time_t local = utc + 3600 * timeZone;
 	sprintf(timestamp, "%4d-%02d-%02d %02d:%02d:%02d", year(local), month(local), day(local), hour(local), minute(local), second(local));
 	return String(timestamp);
+}
+
+void ICACHE_FLASH_ATTR onChange()
+{
+	// Get the pin reading.
+	int reading = digitalRead(forceAPpin);
+
+	// Ignore dupe readings.
+	if (reading == btnState)
+		return;
+
+	boolean debounce = false;
+
+	// Check to see if the change is within a debounce delay threshold.
+	if ((millis() - lastDebounceTime) <= debounceDelay)
+	{
+		debounce = true;
+	}
+
+	// This update to the last debounce check is necessary regardless of debounce state.
+	lastDebounceTime = millis();
+
+	// Ignore reads within a debounce delay threshold.
+	if (debounce)
+		return;
+
+	// All is good, persist the reading as the state.
+	btnState = reading;
+
+	// Work with the value now.
+	if (reading == 0)
+	{
+
+#ifdef DEBUG
+		Serial.println(F("[ INFO ] Button pressed"));
+		alarmtime = now();
+		emailkind = 0b10000000;
+#endif
+		//sendBtnEvent();
+	}
 }
