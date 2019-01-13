@@ -81,6 +81,15 @@ uint8_t configMode = 0;
 uint8_t wifipin = 255;
 uint8_t forceAPpin = 255;
 uint8_t sensortype = 0;
+
+// Holds the current button state.
+volatile uint8_t btnState = 1;
+// Holds the last time debounce was evaluated (in millis).
+volatile uint32_t lastDebounceTime = 0;
+// The delay threshold for debounce checking.
+const uint8_t debounceDelay = 50;
+
+
 //static const uint8_t SDA_PIN = 13; //D7
 //static const uint8_t SCL_PIN = 14; //D5
 static const uint8_t SDA_PIN = 4; //D2
