@@ -1,4 +1,4 @@
-# ESP RCM - Room Climate Minitor with ESP8266, HTU21D, Si7021, AM2320
+# ESP RCM - Room Climate Monitor with ESP8266, HTU21D, Si7021, AM2320
 
 Room Climate Monitor system using a cheap sensor HTU21D, SI7021 or AM2320 and Espressif's ESP8266 Microcontroller. 
 
