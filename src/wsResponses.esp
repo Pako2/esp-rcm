@@ -107,6 +107,7 @@ void ICACHE_FLASH_ATTR sendClimate(bool update) {
 	root["temperature"] = my_round(temperature.value);
 	root["humidity"] = my_round(humidity.value);
 	root["update"] = update;
+	if (!update) {root["version"] = VERSION;}
 	size_t len = root.measureLength();
 	AsyncWebSocketMessageBuffer *buffer = ws.makeBuffer(len);
 	if (buffer) {

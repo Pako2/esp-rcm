@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
+#define VERSION "0.1.1"
+
 #include "Arduino.h"
 #include <ESP8266WiFi.h>
 #include <WiFiClientSecure.h>
@@ -195,7 +197,8 @@ void ICACHE_FLASH_ATTR setup()
 	Serial.begin(115200);
 	Serial.println();
 
-	Serial.println(F("[ INFO ] ESP RCM v0.0"));
+	Serial.print(F("[ INFO ] ESP RCM v"));
+	Serial.println(VERSION);
 
 	uint32_t realSize = ESP.getFlashChipRealSize();
 	uint32_t ideSize = ESP.getFlashChipSize();
