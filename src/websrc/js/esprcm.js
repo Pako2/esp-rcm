@@ -1,4 +1,4 @@
-var version = "0.1.0";
+var version = "";
 
 var websock = null;
 var wsUri = "ws://" + window.location.hostname + "/ws";
@@ -522,9 +522,9 @@ function builddata(obj) {
     data = data.concat(obj.list);
 }
 
-function testRelay() {
-    websock.send("{\"command\":\"testrelay\"}");
-}
+// function testRelay() {
+//     websock.send("{\"command\":\"testrelay\"}");
+// }
 
 function colorStatusbar(ref) {
     var percentage = ref.style.width.slice(0, -1);
@@ -537,13 +537,13 @@ function listClimate() {
     initScale(tlimits[0], tlimits[1]);
     //   $(".amount").css("height",0)
     setValue(temperature, tlimits[0], tlimits[1]);
-    changeNum(humidity, hlimits[0], hlimits[1])
+    changeNum(humidity, hlimits[0], hlimits[1]);
+
 }
 
 $.fn.animateRotate = function (startAngle, endAngle, duration, easing, complete) {
     return this.each(function () {
         var elem = $(this);
-
         $({ deg: startAngle }).animate({ deg: endAngle }, {
             duration: duration,
             easing: easing,
@@ -582,7 +582,6 @@ function listStats() {
     document.getElementById("dns").innerHTML = ajaxobj.dns;
     document.getElementById("mac").innerHTML = ajaxobj.mac;
     document.getElementById("sver").innerText = version;
-    $("#mainver").text(version);
 }
 
 function getContent(contentname) {
@@ -1009,10 +1008,14 @@ function socketMessageListener(evt) {
                 break;
             case "climate":
                 old_hum = humidity;
+                version = obj.version;
                 temperature = obj.temperature;
                 humidity = obj.humidity;
                 if (obj.update) { listClimate(); }
-                else { getContent("#climatecontent"); }
+                else {
+                     getContent("#climatecontent"); 
+                     $("#mainver").text(version);
+                }
                 break;
             case "eventlist":
                 haspages = obj.haspages;
