@@ -1008,13 +1008,13 @@ function socketMessageListener(evt) {
                 break;
             case "climate":
                 old_hum = humidity;
-                version = obj.version;
                 temperature = obj.temperature;
                 humidity = obj.humidity;
                 if (obj.update) { listClimate(); }
                 else {
-                     getContent("#climatecontent"); 
-                     $("#mainver").text(version);
+                    version = obj.version;
+                    getContent("#climatecontent"); 
+                    $("#mainver").text(version);
                 }
                 break;
             case "eventlist":
