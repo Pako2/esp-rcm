@@ -31,7 +31,7 @@ String ICACHE_FLASH_ATTR getKind(uint8_t knd)
 	String res = "";
 	if (knd == 0b10000000)
 	{
-		res += "Test buton pressed !";
+		res += "Test button pressed !";
 	}
 	else
 	{
