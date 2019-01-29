@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-#define VERSION "0.1.2"
+#define VERSION "0.1.3"
 
 #include "Arduino.h"
 #include <ESP8266WiFi.h>
